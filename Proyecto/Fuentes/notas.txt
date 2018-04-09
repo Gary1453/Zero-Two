@@ -1,0 +1,7 @@
+http://www.osce.gob.pe/consultasenlinea/rnp_consulta/ProveedoresInscritos.asp?action=enviar
+http://docs.python-requests.org/en/master/
+https://stackoverflow.com/questions/38298459/how-can-i-simulate-onclick-event-in-python
+https://automatetheboringstuff.com/chapter11/
+https://www.crummy.com/software/BeautifulSoup/bs4/doc/
+https://docs.python.org/3/library/csv.html
+http://zetcode.com/python/csv/

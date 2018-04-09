@@ -1,0 +1,380 @@
+<html>
+ <head>
+  <title>
+   Relación de proveedores inscritos en el RNP
+  </title>
+  <link href="intranet.css" rel="stylesheet" type="text/css"/>
+  <style>
+   TD.TDData {
+			FONT-FAMILY: Verdana;
+			FONT-SIZE: 11px;
+		}
+		
+		
+		TD.TDTitulo {
+			FONT-FAMILY: Verdana;
+			FONT-SIZE: 10;
+		}
+		
+		
+		TD.TDHeader {
+			FONT-FAMILY: Verdana;
+			FONT-SIZE: 10;
+			FONT-WEIGHT: Bold;
+			TEXT-ALIGN: Right;
+		}
+		
+				
+		.CabCampos
+		{
+			FONT-WEIGHT: Bold;
+			COLOR: #000000;
+			TEXT-ALIGN: center;
+			BACKGROUND-COLOR: #f5f5f5;
+			FONT-FAMILY: Verdana;
+			FONT-SIZE: 10;
+		}
+		
+		a:link {text-decoration:none; color: #ED0F0F;}
+		a:visited {text-decoration:none; color:#ED0F0F}
+  </style>
+  <script language="javascript">
+   function IsNumeric(sText)
+{
+   var ValidChars = "0123456789.";
+   var IsNumber=true;
+   var Char;
+   var n = 0;
+ 
+   for (i = 0; i < sText.length && IsNumber == true; i++) 
+      { 
+      Char = sText.charAt(i); 
+      if (ValidChars.indexOf(Char) == -1) 
+         {
+         IsNumber = false;
+         }
+      
+      else{
+		if(Char == ".")
+			n++;
+      }
+   
+      if(n > 1)
+		   IsNumber = false;
+	}
+   
+   return IsNumber;
+}
+
+
+function Busca()
+{
+	if (frmRegistro.txtRuc.value != "")
+	{
+		if (IsNumeric(frmRegistro.txtRuc.value) == false)
+		{	return; }
+	}
+	
+	frmRegistro.action = "ProveedoresInscritos.asp?action=enviar";
+	frmRegistro.method = "POST";
+	frmRegistro.submit();	
+}
+
+function txtRuc_KeyDown()
+{
+	var x = window.event.keyCode;	
+	switch (x){
+		case 16: case 17: case 46: case 48: case 49: case 50: case 51: case 52: case 53: case 54: case 55: case 56: case 57: 
+			return;
+		default:
+			window.event.keyCode = 0;
+			break;
+	}
+}
+
+function txtRNC_KeyDown()
+{
+	var x = window.event.keyCode;	
+	switch (x){
+		case 16: case 17: case 46: case 48: case 49: case 50: case 51: case 52: case 53: case 54: case 55: case 56: case 57: case 66: case 67: case 83: case 98: case 99: case 115:
+			return;
+		default:		
+			window.event.keyCode = 0;
+			return false;
+	}	
+}
+
+function firstPage()
+{
+	frmRegistro.action = "ProveedoresInscritos.asp?action=enviar&page=1";
+	frmRegistro.method = "POST";
+	frmRegistro.submit();	
+}
+
+
+function previousPage(paginaActual)
+{
+	paginaActual = paginaActual - 1;
+	frmRegistro.action = "ProveedoresInscritos.asp?action=enviar&page=" + paginaActual;
+	frmRegistro.method = "POST";
+	frmRegistro.submit();	
+}
+
+
+function nextPage(paginaActual)
+{
+	paginaActual = paginaActual + 1;
+	frmRegistro.action = "ProveedoresInscritos.asp?action=enviar&page=" + paginaActual;
+	frmRegistro.method = "POST";
+	frmRegistro.submit();	
+}
+
+
+function lastPage(totalPaginas)
+{
+	frmRegistro.action = "ProveedoresInscritos.asp?action=enviar&page=" + totalPaginas;
+	frmRegistro.method = "POST";
+	frmRegistro.submit();	
+}
+
+function abrirpopup(url)
+{
+		newwindow=window.open(url,'detalle','height=160,width=680');
+}
+  </script>
+ </head>
+ <body leftmargin="0" topmargin="0">
+  <form id="frmRegistro" name="frmRegistro">
+   <table width="100%">
+    <tr class="thclass">
+     <td class="tdTitulo">
+      Relación de proveedores inscritos en el RNP
+     </td>
+    </tr>
+   </table>
+   <br/>
+   <br/>
+   <table align="center" border="0" bordercolor="#DDDDDD" bordercolordark="#DDDDDD" bordercolorlight="#DDDDDD" cellpadding="2" cellspacing="0" class="table2" width="600">
+    <tr id="trPersJur0">
+     <td class="header">
+      RUC:
+     </td>
+     <td>
+      <input id="txtRuc" maxlength="11" name="txtRuc" onkeydown="txtRuc_KeyDown()" onkeypress="txtRuc_KeyDown()" style="width:90" value="20101093027"/>
+     </td>
+     <td class="header">
+      RNP:
+     </td>
+     <td>
+      <input id="txtRnp" maxlength="8" name="txtRnp" onkeydown="txtRNC_KeyDown()" onkeypress="txtRNC_KeyDown()" style="width:90" value=""/>
+     </td>
+    </tr>
+    <tr>
+     <td class="header">
+      Capítulo:
+     </td>
+     <td>
+      <select id="cmbCapitulo" name="cmbCapitulo">
+       <option selected="" value="">
+        -- Todos --
+       </option>
+       <option value="1">
+        EJECUTOR DE OBRAS
+       </option>
+       <option value="2">
+        CONSULTOR DE OBRAS
+       </option>
+       <option value="3">
+        BIENES
+       </option>
+       <option value="4">
+        SERVICIOS
+       </option>
+      </select>
+     </td>
+     <td class="header">
+      Tipo persona:
+     </td>
+     <td>
+      <select id="cmbTipoPersona" name="cmbTipoPersona">
+       <option selected="" value="">
+        -- Todos --
+       </option>
+       <option value="2">
+        PERSONA JURIDICA
+       </option>
+       <option value="1">
+        PERSONA NATURAL
+       </option>
+      </select>
+     </td>
+    </tr>
+    <tr>
+     <td>
+     </td>
+     <td>
+      <input id="chkExtranjero" name="chkExtranjero" type="checkbox"/>
+      Sólo extranjeros
+     </td>
+     <td>
+     </td>
+     <td>
+      <input id="chkVigente" name="chkVigente" type="checkbox"/>
+      Sólo vigentes
+     </td>
+     <td align="right" colspan="2">
+      <input id="button1" name="button1" onclick="Busca()" type="button" value="Buscar"/>
+     </td>
+    </tr>
+   </table>
+   <br/>
+   <br/>
+   
+   <table border="1" bordercolor="#000000" bordercolordark="#000000" bordercolorlight="#000000" cellpadding="2" cellspacing="2" class="table2" style="border-collapse:collapse" width="90%">
+    <tr>
+     <td colspan="13" height="23px">
+      <b>
+       Resultados de la consulta:
+      </b>
+      (Solo se muestran hasta 50 resultados)
+     </td>
+    </tr>
+    <tr class="CabCampos">
+     <td rowspan="2">
+      RNP
+     </td>
+     <td nowrap="" rowspan="2">
+      RUC
+     </td>
+     <td nowrap="" rowspan="2">
+      NOMBRE/RAZÓN SOCIAL
+     </td>
+     <td rowspan="2">
+      CAPITULO
+     </td>
+     <td rowspan="2">
+      PERSONA
+     </td>
+     <td nowrap="" rowspan="2">
+      F. APROB
+     </td>
+     <td colspan="2" nowrap="">
+      VIGENCIA PARA SER PARTICIPANTE Y POSTOR
+     </td>
+     <td colspan="2" nowrap="">
+      VIGENCIA PARA SER PARTICIPANTE, POSTOR Y CONTRATISTA
+     </td>
+     <td nowrap="" rowspan="2">
+      ESTADO
+     </td>
+     <td nowrap="" rowspan="2">
+      TIENE O HA TENIDO SUSPENSIÓN
+      <br/>
+      EN SU VIGENCIA PARA SER PARTICIPANTE, POSTOR Y CONTRATISTA?
+     </td>
+     <td nowrap="" rowspan="2">
+      OBSERVACION
+     </td>
+    </tr>
+    <tr class="CabCampos">
+     <td nowrap="">
+      F. INI VIG.
+     </td>
+     <td nowrap="">
+      F. FIN VIG.
+     </td>
+     <td nowrap="">
+      F. INI VIG.
+     </td>
+     <td nowrap="">
+      F. FIN VIG.
+     </td>
+    </tr>
+    <tr height="20px">
+     <td align="center" class="TDData">
+      B0350177
+     </td>
+     <td align="center" class="TDData" nowrap="">
+      20101093027
+     </td>
+     <td class="TDData">
+      ESTUDIO GRAU SOC CIVIL RESP LTDA
+     </td>
+     <td align="center" class="TDData">
+      PROVEEDOR DE BIENES
+     </td>
+     <td align="center" class="TDData">
+      JURIDICA
+     </td>
+     <td align="center" class="TDData">
+     </td>
+     <td align="center" class="TDData">
+     </td>
+     <td align="center" class="TDData">
+     </td>
+     <td align="center" class="TDData">
+     </td>
+     <td align="center" class="TDData">
+     </td>
+     <td align="center" class="TDData" nowrap="">
+      NO VIGENTE
+     </td>
+     <td align="center" class="TDData" nowrap="">
+      NO
+     </td>
+     <td class="TDData">
+      NO PRESENTADO
+     </td>
+    </tr>
+    <tr bgcolor="#ECF1FA" height="20px">
+     <td align="center" class="TDData">
+      S0218871
+     </td>
+     <td align="center" class="TDData" nowrap="">
+      20101093027
+     </td>
+     <td class="TDData">
+      ESTUDIO GRAU SOC CIVIL RESP LTDA
+     </td>
+     <td align="center" class="TDData">
+      PROVEEDOR DE SERVICIOS
+     </td>
+     <td align="center" class="TDData">
+      JURIDICA
+     </td>
+     <td align="center" class="TDData">
+      07/02/2017
+     </td>
+     <td align="center" class="TDData">
+     </td>
+     <td align="center" class="TDData">
+     </td>
+     <td align="center" class="TDData">
+      13/02/2017
+     </td>
+     <td align="center" class="TDData">
+      VIGENCIA INDETERMINADA
+     </td>
+     <td align="center" class="TDData" nowrap="">
+      VIGENTE
+     </td>
+     <td align="center" class="TDData" nowrap="">
+      NO
+     </td>
+     <td class="TDData">
+      APROBACION AUTOMATICA
+     </td>
+    </tr>
+    <tr>
+     <td align="center" colspan="13">
+      Página 1 de 1
+      <input disabled="" id="button2" name="button2" onclick="firstPage()" style="width:30px;" type="button" value="&lt;&lt;"/>
+      <input disabled="" id="button3" name="button3" onclick="previousPage(1)" style="width:30px;" type="button" value="&lt;"/>
+      <input disabled="" id="button1" name="button1" onclick="nextPage(1)" style="width:30px;" type="button" value="&gt;"/>
+      <input disabled="" id="button4" name="button4" onclick="lastPage(1)" style="width:30px;" type="button" value="&gt;&gt;"/>
+     </td>
+    </tr>
+   </table>
+  </form>
+ </body>
+</html>
