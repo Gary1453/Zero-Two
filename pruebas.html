@@ -1,380 +1,219 @@
 <html>
- <head>
-  <title>
-   Relación de proveedores inscritos en el RNP
-  </title>
-  <link href="intranet.css" rel="stylesheet" type="text/css"/>
-  <style>
-   TD.TDData {
-			FONT-FAMILY: Verdana;
-			FONT-SIZE: 11px;
-		}
-		
-		
-		TD.TDTitulo {
-			FONT-FAMILY: Verdana;
-			FONT-SIZE: 10;
-		}
-		
-		
-		TD.TDHeader {
-			FONT-FAMILY: Verdana;
-			FONT-SIZE: 10;
-			FONT-WEIGHT: Bold;
-			TEXT-ALIGN: Right;
-		}
-		
-				
-		.CabCampos
-		{
-			FONT-WEIGHT: Bold;
-			COLOR: #000000;
-			TEXT-ALIGN: center;
-			BACKGROUND-COLOR: #f5f5f5;
-			FONT-FAMILY: Verdana;
-			FONT-SIZE: 10;
-		}
-		
-		a:link {text-decoration:none; color: #ED0F0F;}
-		a:visited {text-decoration:none; color:#ED0F0F}
-  </style>
-  <script language="javascript">
-   function IsNumeric(sText)
-{
-   var ValidChars = "0123456789.";
-   var IsNumber=true;
-   var Char;
-   var n = 0;
+<head>
+<title>Consulta RUC</title>
+</head>
+<link href="/a/css/estilos2_0.css" rel="stylesheet"/>
+<script languaje="JavaScript" src="/a/js/js.js"> </script>
+<script languaje="JavaScript" type="text/javascript">
+var gCount = 0;
+var contPag = 0;
+function goRefresh() {
+ document.mainForm.codigo.value = "";
+ document.mainForm.imagen.src="captcha?accion=image&nmagic=" + gCount;
+ gCount = gCount + 1;
+}
+
+
+function format(type) {
+ var form = document.mainForm;
+ if(type == 0) {
+   document.getElementById('s1').style.visibility = 'visible'; 
+   document.getElementById('s2').style.visibility = 'hidden';
+   document.getElementById('s3').style.visibility = 'hidden';
+   form.search1.maxLength = 11;
+   form.search1.onkeypress = function(e) {
+   if (!e) e=window.event;
+   key = e.keyCode? e.keyCode : e.which>0?e.which:e.keyCode;
+   if (key == 8 || key==9) return true;
+   pattern =/[0-9]/;
+   te = String.fromCharCode(key);
+   return pattern.test(te);     
+  }  
+  form.search1.focus();
+  form.search1.value = "";
+  
+ }
+ if(type == 1) {
+   document.getElementById('s2').style.visibility = 'visible'; 
+   document.getElementById('s1').style.visibility = 'hidden';
+   document.getElementById('s3').style.visibility = 'hidden';
+   form.search2.maxLength = 16; 
+   form.search2.onkeypress = function(e) {return true;}   
+   form.search2.focus();
+   form.search2.value = "";
+ }
  
-   for (i = 0; i < sText.length && IsNumber == true; i++) 
-      { 
-      Char = sText.charAt(i); 
-      if (ValidChars.indexOf(Char) == -1) 
-         {
-         IsNumber = false;
-         }
-      
-      else{
-		if(Char == ".")
-			n++;
-      }
+ if(type == 2) {
+   document.getElementById('s3').style.visibility = 'visible'; 
+   document.getElementById('s1').style.visibility = 'hidden';
+   document.getElementById('s2').style.visibility = 'hidden';
+   form.search3.maxLength = 100;
+   form.search3.onkeypress = function(e) {return true;}   
+   form.search3.focus();
+   form.search3.value = "" ;
+ }
+ 
+// form.search.focus();
+ //form.search.value = ""  ;
+}
+
+function verificaDocumento()
+ {
+   var form = document.mainForm;
+   var   tipdoc = form.tipdoc.value;
+   var    numdoc =form.search2.value;  
+   if (tipdoc=="1")
+    {
+      if (numdoc.length!=8 )
+       {
+          alert("El número de documento de identidad debe tener 8 dígitos");      
+          return false;
+       }
+     else{
+        if ( !esnumero(numdoc) )
+          {
+             alert("El número de documento de identidad debe tener 8 dígitos");     
+             return false;
+          }
+     }       
+    } 
+  return true; 
+  }
+  
+
+function evalSearch() {
+ var form = document.mainForm;
+ if(form.tQuery[0].checked) {
+  form.nroRuc.value = form.search1.value;
+  form.accion.value = "consPorRuc";
+  if(!esrucok(form.nroRuc.value)){
+    alert('Por favor, ingrese numero de RUC valido.');form.search1.focus();return;
+  }
+ }
+ else {
+   if(form.tQuery[2].checked) {
+     form.accion.value = "consPorRazonSoc";
+     form.razSoc.value = form.search3.value;
+     if(!longitudmayor(trim(form.razSoc.value),4) || (trim(form.razSoc.value).substring(0,1)=='*')){
+       alert('La Razón social no es válida ...');form.search3.focus();return;
+     }
+   if ( validar(form.search3.value)==false){
+      alert('Sólo puede ingresar letras y/o números como criterio de búsqueda ...');form.search3.focus();return;
+   }  
    
-      if(n > 1)
-		   IsNumber = false;
-	}
+   }else {//se trata del tipo y nro del documento
+     form.nrodoc.value = form.search2.value;
+     form.accion.value = "consPorTipdoc";
+     if(!longitudmayor(trim(form.nrodoc.value),4) || (trim(form.nrodoc.value).substring(0,1)=='*')){
+       alert('El Nro del documento no es válida ...');form.search2.focus();return;
+     } 
+    if (verificaDocumento()==false) return; 
+    if ( validar2(form.search2.value)==false){
+      alert('Sólo puede ingresar letras  y/o números como criterio de búsqueda ...');form.search2.focus();return;
+    } 
+   } 
    
-   return IsNumber;
+ }
+ if(form.contexto.value == 'ti-it'){
+   if(trim(form.codigo.value).length < 4) {
+     alert('Ingrese el código que se muestra en la imagen');form.codigo.focus();return;
+   }
+  }
+ form.submit();
+}
+function   validar(texto) {
+             x = true;
+       //if (!/^([A-Za-z\s])*$/.test(texto)){ 
+            if (!/^([A-Za-z0-9\s\361\321@\\&\\Ü\\ü\\-\\.\\,])*$/.test(texto)){               
+                x = false;
+             }
+            return x; 
+}
+function   validar2(texto) {
+             x = true;       
+            if (!/^([A-Za-z0-9\\-\\.\\_])*$/.test(texto)){               
+                x = false;
+             }
+            return x; 
 }
 
-
-function Busca()
-{
-	if (frmRegistro.txtRuc.value != "")
-	{
-		if (IsNumeric(frmRegistro.txtRuc.value) == false)
-		{	return; }
-	}
-	
-	frmRegistro.action = "ProveedoresInscritos.asp?action=enviar";
-	frmRegistro.method = "POST";
-	frmRegistro.submit();	
+function getContPag(){
+return -contPag;
 }
-
-function txtRuc_KeyDown()
-{
-	var x = window.event.keyCode;	
-	switch (x){
-		case 16: case 17: case 46: case 48: case 49: case 50: case 51: case 52: case 53: case 54: case 55: case 56: case 57: 
-			return;
-		default:
-			window.event.keyCode = 0;
-			break;
-	}
+function incContPag(){
+contPag=contPag+1;
 }
-
-function txtRNC_KeyDown()
-{
-	var x = window.event.keyCode;	
-	switch (x){
-		case 16: case 17: case 46: case 48: case 49: case 50: case 51: case 52: case 53: case 54: case 55: case 56: case 57: case 66: case 67: case 83: case 98: case 99: case 115:
-			return;
-		default:		
-			window.event.keyCode = 0;
-			return false;
-	}	
+function resetContPag(){
+contPag=0;
 }
-
-function firstPage()
-{
-	frmRegistro.action = "ProveedoresInscritos.asp?action=enviar&page=1";
-	frmRegistro.method = "POST";
-	frmRegistro.submit();	
-}
-
-
-function previousPage(paginaActual)
-{
-	paginaActual = paginaActual - 1;
-	frmRegistro.action = "ProveedoresInscritos.asp?action=enviar&page=" + paginaActual;
-	frmRegistro.method = "POST";
-	frmRegistro.submit();	
-}
-
-
-function nextPage(paginaActual)
-{
-	paginaActual = paginaActual + 1;
-	frmRegistro.action = "ProveedoresInscritos.asp?action=enviar&page=" + paginaActual;
-	frmRegistro.method = "POST";
-	frmRegistro.submit();	
-}
-
-
-function lastPage(totalPaginas)
-{
-	frmRegistro.action = "ProveedoresInscritos.asp?action=enviar&page=" + totalPaginas;
-	frmRegistro.method = "POST";
-	frmRegistro.submit();	
-}
-
-function abrirpopup(url)
-{
-		newwindow=window.open(url,'detalle','height=160,width=680');
-}
-  </script>
- </head>
- <body leftmargin="0" topmargin="0">
-  <form id="frmRegistro" name="frmRegistro">
-   <table width="100%">
-    <tr class="thclass">
-     <td class="tdTitulo">
-      Relación de proveedores inscritos en el RNP
-     </td>
-    </tr>
-   </table>
-   <br/>
-   <br/>
-   <table align="center" border="0" bordercolor="#DDDDDD" bordercolordark="#DDDDDD" bordercolorlight="#DDDDDD" cellpadding="2" cellspacing="0" class="table2" width="600">
-    <tr id="trPersJur0">
-     <td class="header">
-      RUC:
-     </td>
-     <td>
-      <input id="txtRuc" maxlength="11" name="txtRuc" onkeydown="txtRuc_KeyDown()" onkeypress="txtRuc_KeyDown()" style="width:90" value="20101093027"/>
-     </td>
-     <td class="header">
-      RNP:
-     </td>
-     <td>
-      <input id="txtRnp" maxlength="8" name="txtRnp" onkeydown="txtRNC_KeyDown()" onkeypress="txtRNC_KeyDown()" style="width:90" value=""/>
-     </td>
-    </tr>
-    <tr>
-     <td class="header">
-      Capítulo:
-     </td>
-     <td>
-      <select id="cmbCapitulo" name="cmbCapitulo">
-       <option selected="" value="">
-        -- Todos --
-       </option>
-       <option value="1">
-        EJECUTOR DE OBRAS
-       </option>
-       <option value="2">
-        CONSULTOR DE OBRAS
-       </option>
-       <option value="3">
-        BIENES
-       </option>
-       <option value="4">
-        SERVICIOS
-       </option>
-      </select>
-     </td>
-     <td class="header">
-      Tipo persona:
-     </td>
-     <td>
-      <select id="cmbTipoPersona" name="cmbTipoPersona">
-       <option selected="" value="">
-        -- Todos --
-       </option>
-       <option value="2">
-        PERSONA JURIDICA
-       </option>
-       <option value="1">
-        PERSONA NATURAL
-       </option>
-      </select>
-     </td>
-    </tr>
-    <tr>
-     <td>
-     </td>
-     <td>
-      <input id="chkExtranjero" name="chkExtranjero" type="checkbox"/>
-      Sólo extranjeros
-     </td>
-     <td>
-     </td>
-     <td>
-      <input id="chkVigente" name="chkVigente" type="checkbox"/>
-      Sólo vigentes
-     </td>
-     <td align="right" colspan="2">
-      <input id="button1" name="button1" onclick="Busca()" type="button" value="Buscar"/>
-     </td>
-    </tr>
-   </table>
-   <br/>
-   <br/>
-   
-   <table border="1" bordercolor="#000000" bordercolordark="#000000" bordercolorlight="#000000" cellpadding="2" cellspacing="2" class="table2" style="border-collapse:collapse" width="90%">
-    <tr>
-     <td colspan="13" height="23px">
-      <b>
-       Resultados de la consulta:
-      </b>
-      (Solo se muestran hasta 50 resultados)
-     </td>
-    </tr>
-    <tr class="CabCampos">
-     <td rowspan="2">
-      RNP
-     </td>
-     <td nowrap="" rowspan="2">
-      RUC
-     </td>
-     <td nowrap="" rowspan="2">
-      NOMBRE/RAZÓN SOCIAL
-     </td>
-     <td rowspan="2">
-      CAPITULO
-     </td>
-     <td rowspan="2">
-      PERSONA
-     </td>
-     <td nowrap="" rowspan="2">
-      F. APROB
-     </td>
-     <td colspan="2" nowrap="">
-      VIGENCIA PARA SER PARTICIPANTE Y POSTOR
-     </td>
-     <td colspan="2" nowrap="">
-      VIGENCIA PARA SER PARTICIPANTE, POSTOR Y CONTRATISTA
-     </td>
-     <td nowrap="" rowspan="2">
-      ESTADO
-     </td>
-     <td nowrap="" rowspan="2">
-      TIENE O HA TENIDO SUSPENSIÓN
-      <br/>
-      EN SU VIGENCIA PARA SER PARTICIPANTE, POSTOR Y CONTRATISTA?
-     </td>
-     <td nowrap="" rowspan="2">
-      OBSERVACION
-     </td>
-    </tr>
-    <tr class="CabCampos">
-     <td nowrap="">
-      F. INI VIG.
-     </td>
-     <td nowrap="">
-      F. FIN VIG.
-     </td>
-     <td nowrap="">
-      F. INI VIG.
-     </td>
-     <td nowrap="">
-      F. FIN VIG.
-     </td>
-    </tr>
-    <tr height="20px">
-     <td align="center" class="TDData">
-      B0350177
-     </td>
-     <td align="center" class="TDData" nowrap="">
-      20101093027
-     </td>
-     <td class="TDData">
-      ESTUDIO GRAU SOC CIVIL RESP LTDA
-     </td>
-     <td align="center" class="TDData">
-      PROVEEDOR DE BIENES
-     </td>
-     <td align="center" class="TDData">
-      JURIDICA
-     </td>
-     <td align="center" class="TDData">
-     </td>
-     <td align="center" class="TDData">
-     </td>
-     <td align="center" class="TDData">
-     </td>
-     <td align="center" class="TDData">
-     </td>
-     <td align="center" class="TDData">
-     </td>
-     <td align="center" class="TDData" nowrap="">
-      NO VIGENTE
-     </td>
-     <td align="center" class="TDData" nowrap="">
-      NO
-     </td>
-     <td class="TDData">
-      NO PRESENTADO
-     </td>
-    </tr>
-    <tr bgcolor="#ECF1FA" height="20px">
-     <td align="center" class="TDData">
-      S0218871
-     </td>
-     <td align="center" class="TDData" nowrap="">
-      20101093027
-     </td>
-     <td class="TDData">
-      ESTUDIO GRAU SOC CIVIL RESP LTDA
-     </td>
-     <td align="center" class="TDData">
-      PROVEEDOR DE SERVICIOS
-     </td>
-     <td align="center" class="TDData">
-      JURIDICA
-     </td>
-     <td align="center" class="TDData">
-      07/02/2017
-     </td>
-     <td align="center" class="TDData">
-     </td>
-     <td align="center" class="TDData">
-     </td>
-     <td align="center" class="TDData">
-      13/02/2017
-     </td>
-     <td align="center" class="TDData">
-      VIGENCIA INDETERMINADA
-     </td>
-     <td align="center" class="TDData" nowrap="">
-      VIGENTE
-     </td>
-     <td align="center" class="TDData" nowrap="">
-      NO
-     </td>
-     <td class="TDData">
-      APROBACION AUTOMATICA
-     </td>
-    </tr>
-    <tr>
-     <td align="center" colspan="13">
-      Página 1 de 1
-      <input disabled="" id="button2" name="button2" onclick="firstPage()" style="width:30px;" type="button" value="&lt;&lt;"/>
-      <input disabled="" id="button3" name="button3" onclick="previousPage(1)" style="width:30px;" type="button" value="&lt;"/>
-      <input disabled="" id="button1" name="button1" onclick="nextPage(1)" style="width:30px;" type="button" value="&gt;"/>
-      <input disabled="" id="button4" name="button4" onclick="lastPage(1)" style="width:30px;" type="button" value="&gt;&gt;"/>
-     </td>
-    </tr>
-   </table>
-  </form>
- </body>
+</script>
+<body bgcolor="#FFFFFF" onload="JavaScript:format(0)">
+<form action="jcrS00Alias" method="post" name="mainForm" target="mainFrame">
+<table border="0" cellpadding="3" cellspacing="2" class="form-table" width="100%">
+<tbody>
+<tr>
+<td>
+<table border="0" cellpadding="3" cellspacing="2" width="100%">
+<tbody>
+<tr>
+<td align="left" bgcolor="#3399cc"><b>CRITERIOS DE BÚSQUEDA:</b></td>
+</tr>
+</tbody>
+</table>
+<input name="accion" type="hidden" value=""/>
+<input name="razSoc" type="hidden" value=""/>
+<input name="nroRuc" type="hidden" value=""/>
+<input name="nrodoc" type="hidden" value=""/>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tbody>
+<input name="contexto" type="hidden" value="ti-it"/>
+<tr>
+<td width="2%"><input checked="" name="tQuery" onclick="format(0)" type="radio"/></td>
+<td class="bgn" width="20%">Número de RUC</td>
+<td align="left" colspan="1" width="30%">
+<div id="s1" style="visibility:hidden">
+<input class="form-text" name="search1" size="11"/>
+</div>
+</td>
+<!-- <td align="left" rowspan="1" width="180"></td>    -->
+<td class="bgn" rowspan="1" valign="middle" width="20%">Ingrese el código que se muestra en la imagen:</td>
+<td align="left" rowspan="1" width="13%"><img name="imagen" src="captcha?accion=image"/></td>
+<td align="left" rowspan="1" valign="center" width="10%"><input maxlength="4" name="codigo" onchange="this.value=this.value.toUpperCase();" size="4" style="text-transform:uppercase;" type="text"/></td>
+<td rowspan="1" width="5%"><input class="form-button" onclick="evalSearch();" type="button" value="Buscar"/></td>
+</tr>
+<tr>
+<td><input name="tQuery" onclick="format(1)" type="radio"/></td>
+<td class="bgn">Tipo y Número de Documento de Identidad 
+           <select name="tipdoc" size="1">
+<option value="1">Documento Nacional de Identidad </option>
+<option value="4"> Carnet de Extranjeria </option>
+<option value="7"> Pasaporte </option>
+<option value="A"> Ced. Diplomatica de Identidad </option>
+</select>
+</td>
+<td align="left" colspan="1">
+<div id="s2" style="visibility:hidden">
+<input class="form-text" name="search2" size="16"/>
+</div>
+</td>
+<!--<td align="left" rowspan="1"  colspan="2" width="100"></td>   -->
+<td align="left" rowspan="1"><a href="javascript:goRefresh()">Refrescar codigo</a></td>
+</tr>
+<tr>
+<td><input name="tQuery" onclick="format(2)" type="radio"/><input name="coddpto" type="hidden" value=""/><input name="codprov" type="hidden" value=""/><input name="coddist" type="hidden" value=""/></td>
+<td class="bgn">Nombre ó Razón Social </td>
+<td align="left" colspan="4">
+<div id="s3" style="visibility:hidden">
+<input class="form-text" name="search3" size="30"/>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</form>
+</body>
 </html>

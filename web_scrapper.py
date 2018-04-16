@@ -7,6 +7,14 @@ import read_excel as rd
 import tesserocr
 from random import randint
 from PIL import Image
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+from io import BytesIO
+#import time
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+import pandas as pd
 
 #webbrowser.open()
 
@@ -89,61 +97,82 @@ def getRnpData( arrRucs ):
 	#print(  soupData_ )
 	return output
 
-def getRucData():
-
-	headers = { "User-Agent":"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36"}
-	urlRuc = 'http://e-consultaruc.sunat.gob.pe/cl-ti-itmrconsruc/jcrS00Alias'
-	image_url = 'http://e-consultaruc.sunat.gob.pe/cl-ti-itmrconsruc/captcha?accion=image&nmagic=0'
-
-	imgFileName =  'Temporales/Imagen_' + str( randint(0, 100000) ) + '.jpeg'
-
-	var_ruc = 10082112362
-
-	r = requests.get( image_url , allow_redirects = True )
+def getRucData( var_ruc ):
 	
-	#print (r.headers.get('content-type'))
-	with open( imgFileName ,'wb') as f:
+	headers = { "User-Agent":"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36"}
 
-		f.write(r.content)
+	imgFileName =  'Temporales/Imagen_' + str( randint(0, 100000) ) + '.png'
+	url = 'http://e-consultaruc.sunat.gob.pe/cl-ti-itmrconsruc/jcrS00Alias'
+	driver = webdriver.Chrome()
+	driver.maximize_window()
+	driver.get( url )
 
+	driver.implicitly_wait(5)
+
+	driver.switch_to_frame("leftFrame")
+	driver.find_element_by_name('search1').send_keys( var_ruc )
+
+	img = driver.find_element_by_tag_name('img')
+	loc = img.location
+	size = img.size	
+
+
+	png = driver.get_screenshot_as_png()
+	temp = Image.open(BytesIO(png))
+
+	left = loc['x']
+	top = loc['y']
+	right = loc['x'] + size['width']
+	bottom = loc['y'] + size['height']
+
+	temp = temp.crop((left, top, right, bottom)) 
+	temp.save(imgFileName) 				
+	
 	imageCaptcha = Image.open( imgFileName )
 	textImageCaptcha = tesserocr.file_to_text( imgFileName ).strip()
 
-	dataRuc = { 
-		
-			'accion':'consPorRuc', 
-			'coddist': '',
-			'coddpto': '',
-			'codprov': '',
-			'contexto': 'ti-it',
-			'nrodoc': '',
-			'coddist': '',
-			'razSoc': '',
-			'codigo' : textImageCaptcha, 
-			'nroRuc': var_ruc, 
-			'tipdoc' : 1,
-			'search1': var_ruc,
-			'search2': '',
-			'search3': '',
-			'tQuery' : 'on'
-
-			}	
-
-	varRequ = requests.post( 'http://e-consultaruc.sunat.gob.pe/cl-ti-itmrconsruc/frameCriterioBusqueda.jsp' , data =  dataRuc , headers = headers , timeout = 5 )
-	varRequ.encoding = 'utf-8'
+	driver.find_element_by_name('codigo').send_keys( textImageCaptcha )
+	driver.find_element_by_css_selector('.form-button').click()
+	#driver.quit() 
+	
+	driver.switch_to.default_content()
+	#driver.refresh()
 
 	
-	varResponse = varRequ.content
-	print( varRequ.status_code )
-	print( varResponse )
 
+	driver.switch_to_frame("mainFrame")
+
+	temp = driver.find_elements_by_tag_name("td")
+	
+	data = []
+	#row = { 'index' :  , 'value' : }
+
+
+	for i in range(41):
+		"""
+		if temp[i].text.strip() != '':
+			if i%2 != 0:
+				
+				row['value'] =  temp[i].text.strip()
+				data.append( row )
+
+			else :
+
+				row = { 'index' : '' , 'value' : '' }
+				row['index'] =  temp[i].text.strip()
+		"""
+		if temp[i].text.strip() != '':
+			data.append( (temp[i].text).strip() )
+
+	print( data )
+
+	#print( imgFileName )
 	#print( textImageCaptcha )
 
-
-excel_file = "Proyecto/BKG_Pruebas.xlsx"
+#excel_file = "Proyecto/BKG_Pruebas.xlsx"
 #arrRucs = rd.loadDataRuc( excel_file )
 
-getRucData()
+getRucData(10082112362)
 
 #dataProv = getRnpData( arrRucs )
 #exportData( dataProv )
