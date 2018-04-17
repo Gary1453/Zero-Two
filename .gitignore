@@ -1,0 +1,8 @@
+*.jpg
+*.png
+*.jpeg
+notas.txt
+Proyecto/
+__pycache__/
+*.log
+*.txt

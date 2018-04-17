@@ -25,7 +25,7 @@ Funciones a Implementar
 def exportData( rucs ):
 	
 	now = datetime.datetime.now()
-	nombreFile = 'export/output_' + str(now.day) + '_'+ str(now.month) +  '_' + str(now.year) + '_' + str(now.hour) +  '_' + str(now.minute)  +  '_' + str(now.second)
+	nombreFile = 'export/output_' + str(now.day) + '_'+ str(now.month) +  '_' + str(now.year) + '_' + str(now.hour) +  '_' + str(now.minute)  +  '_' + str(now.second) +  '.csv'
 
 	f = open( nombreFile , 'w')
 
@@ -42,7 +42,7 @@ def getRnpData( arrRucs ):
 
 	urlProvIns = 'http://www.osce.gob.pe/consultasenlinea/rnp_consulta/ProveedoresInscritos.asp?action=enviar' 
 
-	arrRucs = arrRucs[0:5]
+	#arrRucs = arrRucs[0:5]
 	output = []
 
 	for ruc in arrRucs:
@@ -89,7 +89,7 @@ def getRnpData( arrRucs ):
 		except IndexError as IndexException:
 			
 			#print ( IndexException )			
-			print ( "El RUC " + str(ruc) + " no tiene proveedores asginados")				
+			print ( "El RUC " + str(ruc) + " no tiene proveedores asignados")				
 
 	#13 columns for a file 	
 	#print( varRequ.status_code )
@@ -97,83 +97,97 @@ def getRnpData( arrRucs ):
 	#print(  soupData_ )
 	return output
 
-def getRucData( var_ruc ):
-	
-	headers = { "User-Agent":"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36"}
+def getRucData( arrRucs ):
 
-	imgFileName =  'Temporales/Imagen_' + str( randint(0, 100000) ) + '.png'
-	url = 'http://e-consultaruc.sunat.gob.pe/cl-ti-itmrconsruc/jcrS00Alias'
-	driver = webdriver.Chrome()
-	driver.maximize_window()
-	driver.get( url )
+	for var_ruc in arrRucs :
 
-	driver.implicitly_wait(5)
+		headers = { "User-Agent":"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36"}
 
-	driver.switch_to_frame("leftFrame")
-	driver.find_element_by_name('search1').send_keys( var_ruc )
+		imgFileName =  'Temporales/Imagen_' + str( randint(0, 100000) ) + '.png'
+		url = 'http://e-consultaruc.sunat.gob.pe/cl-ti-itmrconsruc/jcrS00Alias'
+		driver = webdriver.Chrome()
+		driver.maximize_window()
+		driver.get( url )
 
-	img = driver.find_element_by_tag_name('img')
-	loc = img.location
-	size = img.size	
+		driver.implicitly_wait(5)
 
+		driver.switch_to_frame("leftFrame")
+		driver.find_element_by_name('search1').send_keys( var_ruc )
 
-	png = driver.get_screenshot_as_png()
-	temp = Image.open(BytesIO(png))
-
-	left = loc['x']
-	top = loc['y']
-	right = loc['x'] + size['width']
-	bottom = loc['y'] + size['height']
-
-	temp = temp.crop((left, top, right, bottom)) 
-	temp.save(imgFileName) 				
-	
-	imageCaptcha = Image.open( imgFileName )
-	textImageCaptcha = tesserocr.file_to_text( imgFileName ).strip()
-
-	driver.find_element_by_name('codigo').send_keys( textImageCaptcha )
-	driver.find_element_by_css_selector('.form-button').click()
-	#driver.quit() 
-	
-	driver.switch_to.default_content()
-	#driver.refresh()
-
-	
-
-	driver.switch_to_frame("mainFrame")
-
-	temp = driver.find_elements_by_tag_name("td")
-	
-	data = []
-	#row = { 'index' :  , 'value' : }
+		img = driver.find_element_by_tag_name('img')
+		loc = img.location
+		size = img.size	
 
 
-	for i in range(41):
-		"""
-		if temp[i].text.strip() != '':
-			if i%2 != 0:
-				
-				row['value'] =  temp[i].text.strip()
-				data.append( row )
+		png = driver.get_screenshot_as_png()
+		temp = Image.open(BytesIO(png))
 
-			else :
+		left = loc['x']
+		top = loc['y']
+		right = loc['x'] + size['width']
+		bottom = loc['y'] + size['height']
 
-				row = { 'index' : '' , 'value' : '' }
-				row['index'] =  temp[i].text.strip()
-		"""
-		if temp[i].text.strip() != '':
-			data.append( (temp[i].text).strip() )
+		temp = temp.crop((left, top, right, bottom)) 
+		temp.save(imgFileName) 				
+		
+		imageCaptcha = Image.open( imgFileName )
+		textImageCaptcha = tesserocr.file_to_text( imgFileName ).strip()
 
-	print( data )
+		driver.find_element_by_name('codigo').send_keys( textImageCaptcha )
+		
+		try:
+
+			driver.find_element_by_css_selector('.form-button').click()
+			#driver.quit() 		
+
+			driver.switch_to.default_content()
+			#driver.refresh()
+
+			
+
+			driver.switch_to_frame("mainFrame")
+
+			temp = driver.find_elements_by_tag_name("td")
+			
+			data = []
+			#row = { 'index' :  , 'value' : }
+
+
+			for i in range(41):
+				"""
+				if temp[i].text.strip() != '':
+					if i%2 != 0:
+						
+						row['value'] =  temp[i].text.strip()
+						data.append( row )
+
+					else :
+
+						row = { 'index' : '' , 'value' : '' }
+						row['index'] =  temp[i].text.strip()
+				"""
+				if temp[i].text.strip() != '':
+					data.append( (temp[i].text).strip() )
+
+			print( "================================")
+			print( data )
+			print( "================================")
+			driver.quit()
+
+		except:
+
+			print( "Codigo RUC no existe")
+			driver.quit()
 
 	#print( imgFileName )
 	#print( textImageCaptcha )
 
-#excel_file = "Proyecto/BKG_Pruebas.xlsx"
-#arrRucs = rd.loadDataRuc( excel_file )
+excel_file = "Proyecto/BKG_Pruebas.xlsx"
+arrRucs = rd.loadDataRuc( excel_file )
 
-getRucData(10082112362)
+#print(arrRucs[0:5])
+#getRucData(arrRucs[0:5])
 
-#dataProv = getRnpData( arrRucs )
-#exportData( dataProv )
+dataProv = getRnpData( arrRucs[0:5] )
+exportData( dataProv )
 
